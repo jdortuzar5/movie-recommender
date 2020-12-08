@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  tensorflow-servings:
+    image: tensorflow/serving:latest
+    ports:
+      - 8501:8501
+    environment: 
+      - MODEL_NAME=movie_model
+    volumes: 
+      - ./ai-model/model:/models/movie_model
+    depends_on: [mongo]
+
+  mongo:
+    image: "mongo"
+    container_name: "movieDB"
+    environment: 
+      - MONGO_INITDB_DATABASE=movieRecommenderDB
+    volumes:
+      - ./mongo-volume:/data/db
+    ports: 
+      - 27017:27017
+  
+  backend:
+    build:
+      context: backend/
+      dockerfile: Dockerfile
+    image: movie-backend
+    ports:
+      - 8000:8000
+    depends_on: ["mongo"]
+    environment: 
+      - MONGOHOST=mongo
+      - TF_SERVING_HOST=tensorflow-servings
+
+  frontend:
+    build:
+      context: frontend/
+      dockerfile: Dockerfile
+    image: movie-frontend
+    ports:
+      - 5000:5000
+    depends_on: ["backend"]
