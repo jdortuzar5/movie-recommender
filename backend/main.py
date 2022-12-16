@@ -39,7 +39,7 @@ app.add_middleware(
 )
 
 def get_number_of(collection):
-    num_of_movies = collection.find({}).count()
+    num_of_movies = collection.find({}).count_documents()
     return num_of_movies
 
 def save_to_db(csv_file, file_size, jobId, collection):
